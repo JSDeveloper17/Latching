@@ -1,0 +1,45 @@
+FROM node:20-bookworm
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV SELENIUM_HEADLESS=true
+ENV VERIFY_HEADLESS=true
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+ENV PYTHON_BIN=/opt/venv/bin/python
+ENV PATH=/opt/venv/bin:$PATH
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-venv \
+    python3-pip \
+    chromium \
+    chromium-driver \
+    fonts-liberation \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    libxss1 \
+    libasound2 \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./requirements.txt
+RUN python3 -m venv /opt/venv \
+  && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
+  && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --omit=dev
+
+COPY backend ./backend
+COPY final_cd.py ./final_cd.py
+COPY verify_flipkart_login.py ./verify_flipkart_login.py
+
+RUN mkdir -p /app/uploads /app/reports
+
+WORKDIR /app/backend
+
+CMD ["npm", "start"]
