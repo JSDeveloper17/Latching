@@ -2,14 +2,30 @@
 .agents
 .codex
 .venv
-__pycache__
+**/__pycache__
+**/.pytest_cache
+
+# Node dependencies (never copy host node_modules into the image)
 node_modules
-backend/node_modules
+**/node_modules
+
+# Backend env files (either folder casing)
+backend/.env
+Backend/.env
+backend/.env.local
+Backend/.env.local
+
+# Frontend (not needed in the backend image)
+frontend
 frontend/node_modules
 frontend/dist
+frontend/.env
+
+# Runtime artifacts
 uploads/*
 reports/*
 *.log
-backend/.env
-frontend/.env
+
+# Local env / secrets
 .env
+.env.*
